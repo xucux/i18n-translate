@@ -2,17 +2,33 @@
     <id>com.github.xucux.I18nTranslate</id>
     <name>I18N Translate</name>
     <vendor email="xucux@foxmail.com" url="https://xucux.github.io/">xucux</vendor>
-    <version>0.0.1-231</version>
+    <version>0.0.2-231</version>
     <change-notes>
         <![CDATA[
+    <p>0.0.2</p>
+    <p>- 修复UI显示问题 | Fix UI display issues</p>    
     <p>0.0.1</p>
-    <p>- Initial release</p>
+    <p>- 初始版本 | Initial release</p>
         ]]>
     </change-notes>
 
     <category>Tools</category>
 
     <description><![CDATA[
+    <h3>I18N Translate Plugin Overview</h3>
+    <p>This IntelliJ IDEA plugin helps you manage and translate i18n files (properties, json, yaml/yml). Key features include:</p>
+    <ul>
+        <li>1. Supports multiple translation engines: Alibaba Cloud Machine Translation, Tencent Cloud TMT, and DeepL</li>
+        <li>2. Adds selected text from code into the source i18n file and translates it to target language files</li>
+        <li>3. Translates selected keys from the source language file to one or multiple target language files</li>
+        <li>4. Translates selected keys from the source language file to all target language files</li>
+        <li>5. Supports languages: zh: Simplified Chinese zh-TW: Traditional Chinese en: English ja: Japanese ko: Korean fr: French es: Spanish it: Italian de: German tr: Turkish ru: Russian pt: Portuguese vi: Vietnamese id: Indonesian th: Thai ms: Malay ar: Arabic hi: Hindi</li>
+    </ul>
+    <p><b>Notes:</b></p>
+    <ul>
+        <li>Plugin logs are available in <code>idea.log</code>.</li>
+        <li>Please ensure your proxy settings and access key configuration are correct.</li>
+    </ul>
 
     <h3>I18N Translate 插件简介</h3>
     <p>这是一个支持国际化翻译的IntelliJ IDEA插件，提供对i18n文件（properties、json、yaml/yml）进行修改和翻译的核心功能：</p>
@@ -27,21 +43,6 @@
     <ul>
         <li>插件日志在<code>idea.log</code>中</li>
         <li>请确保代理设置正确，AccessKey设置正确</li>
-    </ul>
-
-    <h3>I18N Translate Plugin Overview</h3>
-    <p>This IntelliJ IDEA plugin helps you manage and translate i18n files (properties, json, yaml/yml). Key features include:</p>
-    <ul>
-        <li>1. Supports multiple translation engines: Alibaba Cloud Machine Translation, Tencent Cloud TMT, and DeepL</li>
-        <li>2. Adds selected text from code into the source i18n file and translates it to target language files</li>
-        <li>3. Translates selected keys from the source language file to one or multiple target language files</li>
-        <li>4. Translates selected keys from the source language file to all target language files</li>
-        <li>5. Supports languages: zh: Simplified Chinese zh-TW: Traditional Chinese en: English ja: Japanese ko: Korean fr: French es: Spanish it: Italian de: German tr: Turkish ru: Russian pt: Portuguese vi: Vietnamese id: Indonesian th: Thai ms: Malay ar: Arabic hi: Hindi</li>
-    </ul>
-    <p><b>Notes:</b></p>
-    <ul>
-        <li>Plugin logs are available in <code>idea.log</code>.</li>
-        <li>Please ensure your proxy settings and access key configuration are correct.</li>
     </ul>
 
     ]]></description>

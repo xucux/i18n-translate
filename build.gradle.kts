@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.xucux"
-version = "0.0.1-231"
+version = "0.0.2-231"
 
 repositories {
     maven("https://maven.aliyun.com/repository/gradle-plugin")
@@ -30,20 +30,13 @@ intellij {
 dependencies {
     implementation("com.aliyun:alimt20181012:1.5.2")
     implementation("com.tencentcloudapi:tencentcloud-sdk-java-tmt:3.1.1436")
-
-    implementation("io.netty:netty-all:4.1.104.Final")
-    implementation("org.yaml:snakeyaml:2.2")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.16.0")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.0")
-    
-    // ASM for bytecode manipulation and class file parsing
-    implementation("org.ow2.asm:asm:9.5")
-    implementation("org.ow2.asm:asm-commons:9.5")
-    implementation("org.ow2.asm:asm-util:9.5")
+    // implementation("org.yaml:snakeyaml:2.2")
     
     // SwingX for JXMultiSplitPane
-    implementation("org.swinglabs.swingx:swingx-all:1.6.5-1")
+    // implementation("org.swinglabs.swingx:swingx-all:1.6.5-1")
 }
 
 tasks {

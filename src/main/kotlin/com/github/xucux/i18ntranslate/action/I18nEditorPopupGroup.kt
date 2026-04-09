@@ -60,8 +60,32 @@ class I18nEditorPopupGroup : ActionGroup(
 
     /** 无可用子项时隐藏本菜单组。 */
     override fun update(e: AnActionEvent) {
-        val children = getChildren(e)
-        e.presentation.isEnabledAndVisible = children.isNotEmpty()
+        e.presentation.isEnabledAndVisible = hasVisibleChildren(e)
+    }
+
+    /**
+     * 仅用于 update 阶段快速判断是否可能有可见子项，避免在插件侧直接调用 OverrideOnly 的 getChildren。
+     */
+    private fun hasVisibleChildren(e: AnActionEvent): Boolean {
+        val project = e.project ?: return false
+        val vf = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return false
+        val editor = e.getData(CommonDataKeys.EDITOR)
+
+        if (editor != null && !I18nPaths.isI18nFile(vf)) {
+            val sel = I18nActionSupport.selectedKeyText(e)
+            if (!sel.isNullOrBlank()) return true
+        }
+
+        if (!I18nPaths.isI18nFile(vf) || !I18nPaths.isProjectSourceFile(project, vf)) return false
+
+        if (editor != null) {
+            val keyInfo = I18nKeyDetector.detectKey(editor, editor.document.charsSequence, vf.path)
+            val hasTargets = project.getService(ProjectI18nConfigService::class.java).getState().targets
+                .any { it.filePath.isNotBlank() }
+            if (keyInfo != null && hasTargets) return true
+        }
+
+        return true
     }
 
 }

@@ -3,8 +3,8 @@ package com.github.xucux.i18ntranslate.config
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.util.Disposer
 import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * 翻译 API 调用统计（总次数 / 成功 / 失败 / 已翻译单词累计）。
@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicLong
 class I18nStatsService : Disposable {
 
     private val cache = I18nStatsMemoryCache()
+    private val disposed = AtomicBoolean(false)
 
     /** 与 [I18nStatsMemoryCache.totalCalls] 同源，供 UI 绑定。 */
     val totalCalls: AtomicLong get() = cache.totalCalls
@@ -26,7 +27,6 @@ class I18nStatsService : Disposable {
 
     init {
         cache.loadFromDisk()
-        Disposer.register(this, Disposable { cache.flushToDisk() })
         scheduleFlush()
     }
 
@@ -38,14 +38,14 @@ class I18nStatsService : Disposable {
     /** 在后台线程中约每 10 分钟 [flushToDisk]，并递归调度直至服务释放。 */
     private fun scheduleFlush() {
         val app = ApplicationManager.getApplication()
-        if (app.isDisposed) return
+        if (app.isDisposed || disposed.get()) return
         app.executeOnPooledThread {
             try {
                 Thread.sleep(600_000L)
             } catch (_: InterruptedException) {
                 Thread.currentThread().interrupt()
             }
-            if (!Disposer.isDisposed(this)) {
+            if (!disposed.get() && !app.isDisposed) {
                 cache.flushToDisk()
                 scheduleFlush()
             }
@@ -65,6 +65,7 @@ class I18nStatsService : Disposable {
 
     /** Application 释放时最终落盘。 */
     override fun dispose() {
+        disposed.set(true)
         cache.flushToDisk()
     }
 }
