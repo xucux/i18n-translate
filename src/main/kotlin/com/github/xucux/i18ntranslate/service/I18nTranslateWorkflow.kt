@@ -6,8 +6,8 @@ import com.github.xucux.i18ntranslate.config.I18nStatsService
 import com.github.xucux.i18ntranslate.config.ProjectI18nConfigService
 import com.github.xucux.i18ntranslate.config.TargetEntry
 import com.github.xucux.i18ntranslate.file.FlatMessageFileIo
-import com.github.xucux.i18ntranslate.lang.SupportedLanguage
-import com.github.xucux.i18ntranslate.translate.TranslationExecutors
+import com.github.xucux.i18ntranslate.domain.SupportedLanguage
+import com.github.xucux.i18ntranslate.translation.engine.TranslationExecutors
 import com.github.xucux.i18ntranslate.util.CharsetUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.WriteAction

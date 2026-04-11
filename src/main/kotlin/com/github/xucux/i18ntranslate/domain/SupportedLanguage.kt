@@ -1,4 +1,4 @@
-package com.github.xucux.i18ntranslate.lang
+package com.github.xucux.i18ntranslate.domain
 
 /**
  * 插件支持的语种：展示使用母语（[nativeName]）+ API 代码（[aliyunCode]，与阿里云文档一致；繁体等个别语种腾讯代码略有不同）。
@@ -85,5 +85,48 @@ enum class SupportedLanguage(
         /** 按腾讯云 TMT 语言代码解析（忽略大小写），无法识别时返回 `null`。 */
         fun fromTencentCode(code: String): SupportedLanguage? =
             values().firstOrNull { it.tencentCode.equals(code, ignoreCase = true) }
+    }
+
+    /** DeepL source language code（source_lang）。 */
+    fun deepLSourceCode(): String = when (this) {
+        CHINESE, CHINESE_TRADITIONAL -> "ZH"
+        ENGLISH -> "EN"
+        FRENCH -> "FR"
+        RUSSIAN -> "RU"
+        GERMAN -> "DE"
+        SPANISH -> "ES"
+        ITALIAN -> "IT"
+        TURKISH -> "TR"
+        ARABIC -> "AR"
+        HINDI -> "HI"
+        JAPANESE -> "JA"
+        VIETNAMESE -> "VI"
+        KOREAN -> "KO"
+        THAI -> "TH"
+        MALAY -> "MS"
+        INDONESIAN -> "ID"
+        PORTUGUESE -> "PT"
+    }
+
+    /** DeepL target language code（target_lang）。 */
+    fun deepLTargetCode(): String = when (this) {
+        CHINESE -> "ZH-HANS"
+        CHINESE_TRADITIONAL -> "ZH-HANT"
+        ENGLISH -> "EN"
+        FRENCH -> "FR"
+        RUSSIAN -> "RU"
+        GERMAN -> "DE"
+        SPANISH -> "ES"
+        ITALIAN -> "IT"
+        TURKISH -> "TR"
+        ARABIC -> "AR"
+        HINDI -> "HI"
+        JAPANESE -> "JA"
+        VIETNAMESE -> "VI"
+        KOREAN -> "KO"
+        THAI -> "TH"
+        MALAY -> "MS"
+        INDONESIAN -> "ID"
+        PORTUGUESE -> "PT"
     }
 }

@@ -1,4 +1,4 @@
-package com.github.xucux.i18ntranslate.ui
+package com.github.xucux.i18ntranslate.view.dialog
 
 import com.github.xucux.i18ntranslate.bundle.I18nTranslateBundle
 import com.github.xucux.i18ntranslate.config.TargetEntry

@@ -1,10 +1,12 @@
-package com.github.xucux.i18ntranslate.translate
+package com.github.xucux.i18ntranslate.translation.engine
 
 import com.github.xucux.i18ntranslate.config.GlobalPluginConfigService
 import com.github.xucux.i18ntranslate.config.GlobalPluginState
 import com.github.xucux.i18ntranslate.config.I18nStatsService
 import com.github.xucux.i18ntranslate.config.TranslateEngine
-import com.github.xucux.i18ntranslate.lang.SupportedLanguage
+import com.github.xucux.i18ntranslate.domain.SupportedLanguage
+import com.github.xucux.i18ntranslate.translation.api.TranslateOutcome
+import com.github.xucux.i18ntranslate.translation.api.TranslationExecutor
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 
@@ -36,7 +38,12 @@ object TranslationExecutors {
             TencentTranslationExecutor(
                 state.tencentSecretId,
                 state.tencentSecretKey,
+                state.tencentRegion,
             )
+        }
+        TranslateEngine.DEEPL -> {
+            logger.info("Using DeepL translation executor")
+            DeepLTranslationExecutor(state.deepLAuthKey)
         }
     }
 
@@ -51,7 +58,7 @@ object TranslationExecutors {
         target: SupportedLanguage,
     ): TranslateOutcome {
         logger.debug(
-            "Translating text with stats: source=${source.name}, target=${target.name}, textLength=${text.length}"
+            "Translating text with stats: source=${source.name}, target=${target.name}, textLength=${text.length}",
         )
         val r = executor.translate(text, source, target)
         val words = if (r.ok) r.billedWords?.coerceAtLeast(0L) ?: 0L else 0L

@@ -1,4 +1,4 @@
-package com.github.xucux.i18ntranslate.settings
+package com.github.xucux.i18ntranslate.view.settings
 
 import com.github.xucux.i18ntranslate.bundle.I18nTranslateBundle
 import com.github.xucux.i18ntranslate.config.FileWriteMode
@@ -10,8 +10,8 @@ import com.github.xucux.i18ntranslate.config.ProjectI18nConfigService
 import com.github.xucux.i18ntranslate.config.ProjectI18nState
 import com.github.xucux.i18ntranslate.config.TargetEntry
 import com.github.xucux.i18ntranslate.config.TranslateEngine
-import com.github.xucux.i18ntranslate.lang.SupportedLanguage
-import com.github.xucux.i18ntranslate.ui.EngineCredentialsDialog
+import com.github.xucux.i18ntranslate.domain.SupportedLanguage
+import com.github.xucux.i18ntranslate.view.dialog.EngineCredentialsDialog
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
@@ -51,7 +51,8 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
     /** 本项目源/目标路径与语种的编辑基准。 */
     private var projectSnapshot: ProjectI18nState = ProjectI18nState.load(project)
 
-    private val engineCombo = ComboBox(arrayOf(TranslateEngine.ALIYUN, TranslateEngine.TENCENT)).apply {
+    /** 翻译引擎：阿里云 / 腾讯云 / DeepL，对应 [GlobalPluginState.translateEngine]。 */
+    private val engineCombo = ComboBox(arrayOf(TranslateEngine.ALIYUN, TranslateEngine.TENCENT, TranslateEngine.DEEPL)).apply {
         renderer = object : javax.swing.DefaultListCellRenderer() {
             override fun getListCellRendererComponent(
                 list: javax.swing.JList<*>?,
@@ -65,22 +66,46 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
         }
         setMinimumAndPreferredWidth(JBUI.scale(300))
     }
+
+    /** 文件编码下拉框的预设项（与 [charsetCombo] 联动）。 */
     private val charsetPresets = arrayOf("UTF-8", "GBK", "ISO-8859-1", "UTF-16")
+
+    /** 消息文件读写字符集（未勾选自定义时写入 [GlobalPluginState.charsetName]）。 */
     private val charsetCombo = ComboBox(charsetPresets)
+
+    /** 勾选后允许手动输入任意编码名，并启用 [customCharsetField]。 */
     private val customCharsetCheck = JBCheckBox()
+
+    /** 自定义字符集名称输入框（与 [GlobalPluginState.customCharset] 配合）。 */
     private val customCharsetField = com.intellij.ui.components.JBTextField()
 
+    /** 目标文件写入策略：覆盖已有 key。 */
     private val overwriteRadio = JBRadioButton()
+
+    /** 目标文件写入策略：已存在 key 则跳过翻译与写入。 */
     private val skipRadio = JBRadioButton()
 
+    /** 开启后由 [com.github.xucux.i18ntranslate.translation.remote.PluginHttpApiClient] 将 HTTP 请求/响应记入 idea.log（`I18N::` 前缀）。 */
+    private val httpDebugLogCheck = JBCheckBox()
+
+    /** 只读：翻译引擎 API 总调用次数。 */
     private val statsTotalLabel = JBLabel()
+
+    /** 只读：成功调用次数。 */
     private val statsOkLabel = JBLabel()
+
+    /** 只读：失败调用次数。 */
     private val statsFailLabel = JBLabel()
+
+    /** 只读：累计计费量（WordCount / UsedAmount / billed_characters 等汇总）。 */
     private val statsWordsValueLabel = JBLabel()
 
+    /** 项目源消息文件路径（浏览选择，对应 [ProjectI18nState.sourceFilePath]）。 */
     private val sourcePathField = TextFieldWithBrowseButton().apply {
         textField.columns = 42
     }
+
+    /** 源消息文件所表示的自然语言（[ProjectI18nState.sourceLanguage]）。 */
     private val sourceLangCombo = ComboBox(SupportedLanguage.values()).apply {
         renderer = object : javax.swing.DefaultListCellRenderer() {
             override fun getListCellRendererComponent(
@@ -95,28 +120,71 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
         }
         setMinimumAndPreferredWidth(JBUI.scale(160))
     }
+
+    /** 动态添加多行「目标路径 + 目标语种」的垂直容器。 */
     private val targetsPanel = JPanel(GridLayout(0, 1))
+
+    /** 与 [targetsPanel] 中各行一一对应的 [TargetRow] 列表，便于序列化与删除。 */
     private val targetRows = mutableListOf<TargetRow>()
 
+    /** 本设置页界面文案预览语言（[GlobalPluginState.uiLanguage]，非 IDE 界面语言）。 */
     private val uiLangCombo = ComboBox(PluginUiLanguage.values())
+
+    /** 打开当前所选引擎的凭证弹窗（[EngineCredentialsDialog]）。 */
     private lateinit var credButton: JButton
+
+    /** 新增一条目标语言行（路径 + 语种）。 */
     private lateinit var addTarget: JButton
+
+    /** 常规区顶部灰色说明（配置落盘路径提示）。 */
     private lateinit var usageHintLabel: JBLabel
+
+    /** 分区标题：「常规」。 */
     private lateinit var generalSectionLabel: JBLabel
+
+    /** 表单项标签：插件界面语言。 */
     private lateinit var uiLanguageLabel: JBLabel
+
+    /** 表单项标签：翻译引擎。 */
     private lateinit var engineLabel: JBLabel
+
+    /** 表单项标签：文件编码。 */
     private lateinit var fileEncodingLabel: JBLabel
+
+    /** 表单项标签：目标写入模式。 */
     private lateinit var writeModeLabel: JBLabel
+
+    /** 「自定义编码」复选框旁说明文字。 */
     private lateinit var customCharsetCaption: JBLabel
+
+    /** 分区标题：「记录」/ 用量统计。 */
     private lateinit var recordsSectionLabel: JBLabel
+
+    /** 表单项标签：引擎调用总次数。 */
     private lateinit var statsCallsLabel: JBLabel
+
+    /** 表单项标签：成功次数。 */
     private lateinit var statsSuccessLabel: JBLabel
+
+    /** 表单项标签：失败次数。 */
     private lateinit var statsFailedLabel: JBLabel
+
+    /** 表单项标签：已翻译总量。 */
     private lateinit var statsWordsTotalLabel: JBLabel
+
+    /** 将内存中的统计计数清零并写回磁盘。 */
     private lateinit var statsResetButton: JButton
+
+    /** 分区标题：「项目国际化配置」。 */
     private lateinit var projI18nSectionLabel: JBLabel
+
+    /** 表单项标签：源文件路径。 */
     private lateinit var sourceFileLabel: JBLabel
+
+    /** 表单项标签：源语言。 */
     private lateinit var sourceLangLabel: JBLabel
+
+    /** 表单项标签：目标语言配置区标题。 */
     private lateinit var targetsSectionLabel: JBLabel
     /** 为 true 时忽略 [uiLangCombo] 的 ActionListener，避免程序化改选中项时递归刷新文案。 */
     private var langComboListenerMuted = false
@@ -204,6 +272,7 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
         targetsSectionLabel.text = I18nTranslateBundle.message("settings.targets")
         overwriteRadio.text = I18nTranslateBundle.message("settings.write.overwrite")
         skipRadio.text = I18nTranslateBundle.message("settings.write.skip")
+        httpDebugLogCheck.text = I18nTranslateBundle.message("settings.http.debug.log")
         credButton.toolTipText = I18nTranslateBundle.message("settings.engine.credentials")
         statsResetButton.text = I18nTranslateBundle.message("settings.stats.reset")
         addTarget.text = I18nTranslateBundle.message("settings.add.target")
@@ -211,8 +280,12 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
     }
 
     /**
-     * 设置页中一行：目标路径浏览 + 语种下拉 + 删除按钮。
-     * @param onRemove 点击删除时从列表与面板移除本行
+     * 设置页中「目标语言」的一行 UI，对应持久化结构 [TargetEntry]（路径 + 语种）。
+     *
+     * @param project 文件选择器上下文（单文件）
+     * @param initialPath 初始目标消息文件磁盘路径
+     * @param initialLang 该行所表示的目标自然语言
+     * @param onRemove 点击删除时从 [targetRows] 与 [targetsPanel] 移除此行
      */
     private inner class TargetRow(
         project: Project,
@@ -220,18 +293,31 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
         initialLang: SupportedLanguage,
         private val onRemove: (TargetRow) -> Unit,
     ) {
-        /** 目标消息文件路径（带浏览）。 */
+        /** 目标消息文件路径（带浏览按钮，写入 [TargetEntry.filePath]）。 */
         val pathField = TextFieldWithBrowseButton().apply {
             textField.columns = 42
         }
-        /** 该行目标消息文件对应的自然语言。 */
+
+        /**
+         * 该目标文件对应的自然语言（与 [sourceLangCombo] 共用渲染器；
+         * 写入 [TargetEntry.language]）。
+         */
         val langCombo = ComboBox(SupportedLanguage.values()).apply {
             renderer = sourceLangCombo.renderer
             selectedItem = initialLang
             setMinimumAndPreferredWidth(JBUI.scale(160))
         }
+
+        /** 表单项标签：目标文件路径（文案来自 Bundle `settings.target.path`）。 */
         private val pathCaption = JBLabel()
+
+        /** 表单项标签：目标语言（文案来自 Bundle `settings.target.lang`）。 */
         private val langCaption = JBLabel()
+
+        /**
+         * 删除本行配置；图标为 GC，无文字，悬浮提示「删除此目标」。
+         * 样式由 [applyIconButtonInteractionStyle] 与 [I18nTranslateBundle] 统一维护。
+         */
         private val removeButton = JButton(AllIcons.Actions.GC).apply {
             toolTipText = ""
             isContentAreaFilled = false
@@ -241,7 +327,11 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
             applyIconButtonInteractionStyle(this)
             addActionListener { onRemove(this@TargetRow) }
         }
-        /** 单行布局容器，供加入 [targetsPanel]。 */
+
+        /**
+         * 单行水平布局容器（左起：路径标签、路径框、语种标签、语种下拉、删除键），
+         * 作为子组件加入 [targetsPanel]。
+         */
         val panel: JPanel = JPanel(BorderLayout()).apply {
             pathField.text = initialPath
             pathField.addBrowseFolderListener(
@@ -250,6 +340,7 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
                 project,
                 FileChooserDescriptorFactory.createSingleFileDescriptor(),
             )
+            /** 单行内控件横向排列，左对齐、间距 8/4。 */
             val north = JPanel(FlowLayout(FlowLayout.LEFT, 8, 4))
             north.add(pathCaption)
             north.add(pathField)
@@ -291,6 +382,7 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
             FileWriteMode.OVERWRITE -> overwriteRadio.isSelected = true
             FileWriteMode.SKIP -> skipRadio.isSelected = true
         }
+        httpDebugLogCheck.isSelected = globalSnapshot.httpDebugLogging
 
         val modeGroup = ButtonGroup()
         modeGroup.add(overwriteRadio)
@@ -371,6 +463,12 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
                     eng,
                     globalSnapshot.tencentSecretId,
                     globalSnapshot.tencentSecretKey,
+                    globalSnapshot.tencentRegion,
+                )
+                TranslateEngine.DEEPL -> EngineCredentialsDialog(
+                    eng,
+                    "",
+                    globalSnapshot.deepLAuthKey,
                 )
             }
             if (dlg.showAndGet()) {
@@ -385,6 +483,12 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
                         globalSnapshot = globalSnapshot.copy(
                             tencentSecretId = dlg.accessId,
                             tencentSecretKey = dlg.accessSecret,
+                            tencentRegion = dlg.tencentRegionCode,
+                        )
+                    }
+                    TranslateEngine.DEEPL -> {
+                        globalSnapshot = globalSnapshot.copy(
+                            deepLAuthKey = dlg.accessSecret,
                         )
                     }
                 }
@@ -450,6 +554,7 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
             .addLabeledComponent(engineLabel, engineRow)
             .addLabeledComponent(fileEncodingLabel, charsetRow)
             .addLabeledComponent(writeModeLabel, modePanel)
+            .addComponent(httpDebugLogCheck)
             .panel
 
         val stats = FormBuilder.createFormBuilder()
@@ -528,6 +633,10 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
             aliyunAccessKeySecret = globalSnapshot.aliyunAccessKeySecret,
             tencentSecretId = globalSnapshot.tencentSecretId,
             tencentSecretKey = globalSnapshot.tencentSecretKey,
+            tencentRegion = globalSnapshot.tencentRegion,
+            deepLAuthKey = globalSnapshot.deepLAuthKey,
+            httpDebugLogging = httpDebugLogCheck.isSelected,
+            firstRunSettingsHintShown = globalSnapshot.firstRunSettingsHintShown,
         )
     }
 
@@ -577,6 +686,7 @@ class I18nTranslateConfigurable(private val project: Project) : Configurable, Di
             FileWriteMode.OVERWRITE -> overwriteRadio.isSelected = true
             FileWriteMode.SKIP -> skipRadio.isSelected = true
         }
+        httpDebugLogCheck.isSelected = g.httpDebugLogging
         sourcePathField.text = pr.sourceFilePath
         sourceLangCombo.selectedItem = pr.sourceLanguage
         projectSnapshot.targets.clear()

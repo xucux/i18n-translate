@@ -2,7 +2,7 @@
     <id>com.github.xucux.I18nTranslate</id>
     <name>I18N Translate</name>
     <vendor email="xucux@foxmail.com" url="https://xucux.github.io/">xucux</vendor>
-    <version>0.0.2-231</version>
+    <version>0.0.3-231</version>
     <change-notes>
         <![CDATA[
     <p>0.0.2</p>
@@ -49,7 +49,14 @@
 
     <depends>com.intellij.modules.platform</depends>
 
+    <resource-bundle>messages.I18nTranslateBundle</resource-bundle>
+
     <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="I18nTranslate.firstRun"
+                           displayType="BALLOON"
+                           key="notification.group.i18n.firstRun"
+                           isThirdPartyTool="true"/>
+        <postStartupActivity implementation="com.github.xucux.i18ntranslate.startup.I18nFirstRunStartupActivity"/>
         <applicationService
                 serviceImplementation="com.github.xucux.i18ntranslate.config.GlobalPluginConfigService"/>
         <applicationService
@@ -59,8 +66,8 @@
 
         <projectConfigurable
                 parentId="other"
-                instance="com.github.xucux.i18ntranslate.settings.I18nTranslateConfigurable"
-                id="com.github.xucux.i18ntranslate.settings.I18nTranslateConfigurable"
+                instance="com.github.xucux.i18ntranslate.view.settings.I18nTranslateConfigurable"
+                id="com.github.xucux.i18ntranslate.view.settings.I18nTranslateConfigurable"
                 displayName="I18N Translate"
                 nonDefaultProject="false"/>
     </extensions>

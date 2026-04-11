@@ -1,4 +1,4 @@
-package com.github.xucux.i18ntranslate.limit
+package com.github.xucux.i18ntranslate.util
 
 /**
  * 固定时间窗口限流：每个窗口 [windowMillis] 内最多 [maxPermits] 次放行。

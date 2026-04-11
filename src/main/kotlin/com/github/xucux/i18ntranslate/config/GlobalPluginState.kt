@@ -30,6 +30,19 @@ data class GlobalPluginState(
     var tencentSecretId: String = "",
     /** 腾讯云 SecretKey。 */
     var tencentSecretKey: String = "",
+    /** 腾讯云 TMT 调用地域（`X-TC-Region`），如 `ap-guangzhou`。 */
+    var tencentRegion: String = TencentTranslateRegion.DEFAULT_CODE,
+    /** DeepL API Auth Key。 */
+    var deepLAuthKey: String = "",
+    /**
+     * 为 true 时，`translation.remote` 中经 [com.github.xucux.i18ntranslate.translation.remote.PluginHttpApiClient]
+     * 发出的 HTTP 请求/响应会写入 IDE Logger，且行首带 `I18N::`（默认关闭，仅供排障）。
+     */
+    var httpDebugLogging: Boolean = false,
+    /**
+     * 为 true 表示已向用户展示过「首次打开请配置」类提示（仅一次），持久化后不再弹出。
+     */
+    var firstRunSettingsHintShown: Boolean = false,
 ) {
     /** 读写资源文件时使用的字符集名称（与 [charsetName] 一致）。 */
     fun resolveCharset(): String = charsetName
@@ -45,6 +58,10 @@ data class GlobalPluginState(
         private const val K_AK_SECRET = "aliyun.accessKeySecret"
         private const val K_TX_ID = "tencent.secretId"
         private const val K_TX_KEY = "tencent.secretKey"
+        private const val K_TX_REGION = "tencent.region"
+        private const val K_DEEPL_AUTH_KEY = "deepl.authKey"
+        private const val K_HTTP_DEBUG_LOG = "dev.httpDebugLog"
+        private const val K_FIRST_RUN_HINT = "ui.firstRunSettingsHintShown"
 
         /** 从磁盘加载；文件不存在则返回默认实例。 */
         fun load(): GlobalPluginState {
@@ -69,6 +86,10 @@ data class GlobalPluginState(
                 aliyunAccessKeySecret = props.getProperty(K_AK_SECRET, ""),
                 tencentSecretId = props.getProperty(K_TX_ID, ""),
                 tencentSecretKey = props.getProperty(K_TX_KEY, ""),
+                tencentRegion = TencentTranslateRegion.fromCodeOrDefault(props.getProperty(K_TX_REGION)).code,
+                deepLAuthKey = props.getProperty(K_DEEPL_AUTH_KEY, ""),
+                httpDebugLogging = props.getProperty(K_HTTP_DEBUG_LOG, "false").toBoolean(),
+                firstRunSettingsHintShown = props.getProperty(K_FIRST_RUN_HINT, "false").toBoolean(),
             )
         }
 
@@ -84,6 +105,10 @@ data class GlobalPluginState(
             props.setProperty(K_AK_SECRET, state.aliyunAccessKeySecret)
             props.setProperty(K_TX_ID, state.tencentSecretId)
             props.setProperty(K_TX_KEY, state.tencentSecretKey)
+            props.setProperty(K_TX_REGION, state.tencentRegion)
+            props.setProperty(K_DEEPL_AUTH_KEY, state.deepLAuthKey)
+            props.setProperty(K_HTTP_DEBUG_LOG, state.httpDebugLogging.toString())
+            props.setProperty(K_FIRST_RUN_HINT, state.firstRunSettingsHintShown.toString())
             Files.createDirectories(globalPropertiesPath().parent)
             Files.newOutputStream(globalPropertiesPath()).use { out ->
                 OutputStreamWriter(out, StandardCharsets.UTF_8).use { w ->

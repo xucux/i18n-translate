@@ -1,6 +1,6 @@
 package com.github.xucux.i18ntranslate.config
 
-import com.github.xucux.i18ntranslate.lang.SupportedLanguage
+import com.github.xucux.i18ntranslate.domain.SupportedLanguage
 import com.github.xucux.i18ntranslate.config.PluginStoragePaths.projectPropertiesPath
 import com.intellij.openapi.project.Project
 import java.io.InputStreamReader

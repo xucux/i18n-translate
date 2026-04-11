@@ -1,6 +1,6 @@
-package com.github.xucux.i18ntranslate.translate
+package com.github.xucux.i18ntranslate.translation.api
 
-import com.github.xucux.i18ntranslate.lang.SupportedLanguage
+import com.github.xucux.i18ntranslate.domain.SupportedLanguage
 
 /**
  * 单次翻译结果：[text] 非空表示成功，否则参考 [errorMessage]。

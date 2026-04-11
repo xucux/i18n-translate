@@ -4,17 +4,20 @@ package com.github.xucux.i18ntranslate.config
 enum class TranslateEngine {
     ALIYUN,
     TENCENT,
+    DEEPL,
     ;
 
     /** 设置页、菜单等场景下的中文展示名。 */
     fun displayZh(): String = when (this) {
         ALIYUN -> "阿里云翻译"
         TENCENT -> "腾讯翻译"
+        DEEPL -> "DeepL 翻译"
     }
 
     /** 设置页、菜单等场景下的英文展示名。 */
     fun displayEn(): String = when (this) {
         ALIYUN -> "Alibaba Cloud Translate"
         TENCENT -> "Tencent Cloud TMT"
+        DEEPL -> "DeepL Translate"
     }
 }

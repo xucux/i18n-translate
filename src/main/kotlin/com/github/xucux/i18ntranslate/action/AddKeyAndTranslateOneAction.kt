@@ -4,9 +4,9 @@ import com.github.xucux.i18ntranslate.bundle.I18nTranslateBundle
 import com.github.xucux.i18ntranslate.config.ProjectI18nConfigService
 import com.github.xucux.i18ntranslate.service.I18nTranslateWorkflow
 import com.github.xucux.i18ntranslate.service.TranslateLogLine
-import com.github.xucux.i18ntranslate.ui.AddKeyDialog
-import com.github.xucux.i18ntranslate.ui.AddKeyDialogMode
-import com.github.xucux.i18ntranslate.ui.TranslationLogDialog
+import com.github.xucux.i18ntranslate.view.dialog.AddKeyDialog
+import com.github.xucux.i18ntranslate.view.dialog.AddKeyDialogMode
+import com.github.xucux.i18ntranslate.view.dialog.TranslationLogDialog
 import com.github.xucux.i18ntranslate.util.I18nPaths
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent

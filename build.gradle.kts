@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.xucux"
-version = "0.0.2-231"
+version = "0.0.3-231"
 
 repositories {
     maven("https://maven.aliyun.com/repository/gradle-plugin")
@@ -28,11 +28,12 @@ intellij {
 }
 
 dependencies {
-    implementation("com.aliyun:alimt20181012:1.5.2")
-    implementation("com.tencentcloudapi:tencentcloud-sdk-java-tmt:3.1.1436")
+    // 翻译走 HTTP API + JDK 签名；不再使用阿里云 / 腾讯云 Java SDK，避免 bcprov 等大体积传递依赖
+    // implementation("com.aliyun:alimt20181012:1.5.2")
+    // implementation("com.tencentcloudapi:tencentcloud-sdk-java-tmt:3.1.1436")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.16.0")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.0")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.0")
+    // implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.0")
     // implementation("org.yaml:snakeyaml:2.2")
     
     // SwingX for JXMultiSplitPane
