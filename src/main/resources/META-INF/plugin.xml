@@ -5,6 +5,8 @@
     <version>0.0.3-231</version>
     <change-notes>
         <![CDATA[
+    <p>0.0.3</p>
+    <p>- 支持DeepL翻译服务 | Support DeepL translation service</p>    
     <p>0.0.2</p>
     <p>- 修复UI显示问题 | Fix UI display issues</p>    
     <p>0.0.1</p>
@@ -26,7 +28,9 @@
     </ul>
     <p><b>Notes:</b></p>
     <ul>
+        <li>Please ensure your source and target file paths are configured before using the plugin</li>
         <li>Plugin logs are available in <code>idea.log</code>.</li>
+        <li>Plugin supports logging HTTP requests and responses, default is closed, can be opened in settings</li>
         <li>Please ensure your proxy settings and access key configuration are correct.</li>
     </ul>
 
@@ -41,7 +45,9 @@
     </ul>
     <p><b>注意事项:</b></p>
     <ul>
+        <li>请提前设置源文件路径和目标文件路径才能使用</li>
         <li>插件日志在<code>idea.log</code>中</li>
+        <li>插件支持打印HTTP请求和响应日志，默认关闭，可以在设置中开启</li>
         <li>请确保代理设置正确，AccessKey设置正确</li>
     </ul>
 

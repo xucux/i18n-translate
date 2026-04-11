@@ -3,9 +3,10 @@ package com.github.xucux.i18ntranslate.translation.remote
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.xucux.i18ntranslate.util.AliyunRoaSignature
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.URI
-import java.net.http.HttpRequest
-import java.time.Duration
 
 /**
  * 阿里云机器翻译通用版 HTTP 接口（JSON Body + ROA 签名）。
@@ -48,10 +49,10 @@ internal object AliyunMtApiClient {
                 bodyUtf8 = bodyBytes,
             )
 
+        val mediaType = AliyunRoaSignature.CONTENT_TYPE_JSON_UTF8.toMediaType()
         val request =
-            HttpRequest.newBuilder()
-                .uri(generalUri)
-                .timeout(Duration.ofSeconds(30))
+            Request.Builder()
+                .url(TRANSLATE_GENERAL_URL)
                 .header("Accept", AliyunRoaSignature.ACCEPT_JSON)
                 .header("Content-Type", AliyunRoaSignature.CONTENT_TYPE_JSON_UTF8)
                 .header("Content-MD5", auth.contentMd5)
@@ -61,14 +62,14 @@ internal object AliyunMtApiClient {
                 .header("x-acs-signature-nonce", auth.signatureNonce)
                 .header("x-acs-signature-method", "HMAC-SHA1")
                 .header("x-acs-version", AliyunRoaSignature.ACS_VERSION)
-                .POST(HttpRequest.BodyPublishers.ofByteArray(bodyBytes))
+                .post(bodyBytes.toRequestBody(mediaType))
                 .build()
 
         return runCatching {
             val response = PluginHttpApiClient.send(request)
-            val text = response.body()
-            if (response.statusCode() != 200) {
-                throwFailureFromBody(text, response.statusCode())
+            val text = response.body
+            if (response.statusCode != 200) {
+                throwFailureFromBody(text, response.statusCode)
             }
             parseSuccessBody(text)
         }

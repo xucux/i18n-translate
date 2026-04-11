@@ -7,7 +7,8 @@ import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
-import com.intellij.util.ui.FormBuilder
+import com.intellij.util.ui.JBUI
+import java.awt.Dimension
 import javax.swing.JComponent
 import javax.swing.JTextField
 
@@ -36,9 +37,9 @@ class AddKeyDialog(
 ) : DialogWrapper(null) {
 
     /** 消息 key，用户可改。 */
-    val keyField = JBTextField(initialKey, 40)
+    val keyField = JBTextField(initialKey).apply { columns = 28 }
     /** 源语言文案 / 待译值。 */
-    val valueField = JBTextField("", 40)
+    val valueField = JBTextField("").apply { columns = 28 }
     private val sourceField = JTextField(sourcePath).apply { isEditable = false }
     private val targetCombo = com.intellij.openapi.ui.ComboBox(targetOptions.toTypedArray()).apply {
         renderer = object : javax.swing.DefaultListCellRenderer() {
@@ -59,7 +60,6 @@ class AddKeyDialog(
     private val targetsArea = JBTextArea(targetPathsPreview.joinToString("\n")).apply {
         isEditable = false
         rows = 5
-        columns = 50
     }
 
     init {
@@ -69,6 +69,7 @@ class AddKeyDialog(
         }
         setOKButtonText(I18nTranslateBundle.message("dialog.ok"))
         setCancelButtonText(I18nTranslateBundle.message("dialog.cancel"))
+        isResizable = true
         init()
     }
 
@@ -86,20 +87,28 @@ class AddKeyDialog(
 
     /** 按 [mode] 拼表单：key、value、源路径及可选目标区。 */
     override fun createCenterPanel(): JComponent {
-        var b = FormBuilder.createFormBuilder()
-            .addLabeledComponent(I18nTranslateBundle.message("dialog.properties.key"), keyField)
-            .addLabeledComponent(I18nTranslateBundle.message("dialog.properties.val"), valueField)
-            .addLabeledComponent(I18nTranslateBundle.message("dialog.source.path"), sourceField)
-        b = when (mode) {
-            AddKeyDialogMode.SINGLE_TARGET ->
-                b.addLabeledComponent(I18nTranslateBundle.message("dialog.target.lang"), targetCombo)
-            AddKeyDialogMode.ALL_TARGETS ->
-                b.addLabeledComponent(
-                    I18nTranslateBundle.message("dialog.target.paths"),
-                    JBScrollPane(targetsArea),
-                )
-            AddKeyDialogMode.SOURCE_ONLY -> b
+        val targetScroll = JBScrollPane(targetsArea).apply {
+            minimumSize = Dimension(JBUI.scale(200), JBUI.scale(80))
+            preferredSize = Dimension(JBUI.scale(520), JBUI.scale(120))
         }
-        return b.panel
+        val rows = buildList {
+            add(LabeledFormRow(I18nTranslateBundle.message("dialog.properties.key"), keyField))
+            add(LabeledFormRow(I18nTranslateBundle.message("dialog.properties.val"), valueField))
+            add(LabeledFormRow(I18nTranslateBundle.message("dialog.source.path"), sourceField))
+            when (mode) {
+                AddKeyDialogMode.SINGLE_TARGET ->
+                    add(LabeledFormRow(I18nTranslateBundle.message("dialog.target.lang"), targetCombo))
+                AddKeyDialogMode.ALL_TARGETS ->
+                    add(
+                        LabeledFormRow(
+                            I18nTranslateBundle.message("dialog.target.paths"),
+                            targetScroll,
+                            stretchVertically = true,
+                        ),
+                    )
+                AddKeyDialogMode.SOURCE_ONLY -> Unit
+            }
+        }
+        return labeledGridFormPanel(rows)
     }
 }

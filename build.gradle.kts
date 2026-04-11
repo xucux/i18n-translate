@@ -33,6 +33,7 @@ dependencies {
     // implementation("com.tencentcloudapi:tencentcloud-sdk-java-tmt:3.1.1436")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.16.0")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     // implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.0")
     // implementation("org.yaml:snakeyaml:2.2")
     

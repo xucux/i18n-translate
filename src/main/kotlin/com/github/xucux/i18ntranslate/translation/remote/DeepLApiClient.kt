@@ -2,11 +2,10 @@ package com.github.xucux.i18ntranslate.translation.remote
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
-import java.net.URI
-import java.net.http.HttpRequest
-import java.nio.charset.StandardCharsets
-import java.time.Duration
 
 /**
  * DeepL HTTP 客户端：封装 `translate` 与 `usage` 两个接口。
@@ -67,26 +66,28 @@ class DeepLApiClient(
     }
 
     private fun execute(method: String, path: String, jsonBody: String?): String {
-        val uri = URI.create(resolveBaseUrl() + path)
-        val builder = HttpRequest.newBuilder(uri)
-            .timeout(Duration.ofSeconds(30))
-            .header("Authorization", "DeepL-Auth-Key $authKey")
-        val request = when (method) {
-            "POST" -> builder
-                .header("Content-Type", "application/json; charset=utf-8")
-                .POST(
-                    HttpRequest.BodyPublishers.ofString(
-                        jsonBody ?: "{}",
-                        StandardCharsets.UTF_8,
-                    ),
-                )
-                .build()
-            else -> builder.GET().build()
-        }
+        val url = resolveBaseUrl() + path
+        val jsonMedia = "application/json; charset=utf-8".toMediaType()
+        val request =
+            when (method) {
+                "POST" ->
+                    Request.Builder()
+                        .url(url)
+                        .header("Authorization", "DeepL-Auth-Key $authKey")
+                        .header("Content-Type", "application/json; charset=utf-8")
+                        .post((jsonBody ?: "{}").toRequestBody(jsonMedia))
+                        .build()
+                else ->
+                    Request.Builder()
+                        .url(url)
+                        .header("Authorization", "DeepL-Auth-Key $authKey")
+                        .get()
+                        .build()
+            }
         val response = PluginHttpApiClient.send(request)
-        val body = response.body().orEmpty()
-        if (response.statusCode() !in 200..299) {
-            val msg = parseErrorMessage(body) ?: "HTTP ${response.statusCode()}"
+        val body = response.body
+        if (response.statusCode !in 200..299) {
+            val msg = parseErrorMessage(body) ?: "HTTP ${response.statusCode}"
             throw IOException(msg)
         }
         if (body.isBlank()) throw IOException("Empty response body")

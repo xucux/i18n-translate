@@ -1,11 +1,11 @@
 package com.github.xucux.i18ntranslate.translation.remote
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.net.URI
-import java.net.http.HttpRequest
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import java.time.Duration
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -59,24 +59,25 @@ internal object TencentTmtTc3ApiClient {
             "TC3-HMAC-SHA256 Credential=$secretId/$credentialScope, " +
                 "SignedHeaders=$signedHeaders, Signature=$signature"
 
-        val request = HttpRequest.newBuilder()
-            .uri(URI.create(ENDPOINT))
-            .timeout(Duration.ofSeconds(30))
-            .header("Authorization", authorization)
-            .header("Content-Type", "application/json; charset=utf-8")
-            .header("Host", HOST)
-            .header("X-TC-Action", ACTION)
-            .header("X-TC-Version", VERSION)
-            .header("X-TC-Timestamp", timestamp)
-            .header("X-TC-Region", region)
-            .POST(HttpRequest.BodyPublishers.ofString(payload, StandardCharsets.UTF_8))
-            .build()
+        val jsonMedia = "application/json; charset=utf-8".toMediaType()
+        val request =
+            Request.Builder()
+                .url(ENDPOINT)
+                .header("Authorization", authorization)
+                .header("Content-Type", "application/json; charset=utf-8")
+                .header("Host", HOST)
+                .header("X-TC-Action", ACTION)
+                .header("X-TC-Version", VERSION)
+                .header("X-TC-Timestamp", timestamp)
+                .header("X-TC-Region", region)
+                .post(payload.toRequestBody(jsonMedia))
+                .build()
 
         return runCatching {
             val response = PluginHttpApiClient.send(request)
-            val text = response.body()
-            if (response.statusCode() != 200) {
-                error("HTTP ${response.statusCode()}: $text")
+            val text = response.body
+            if (response.statusCode != 200) {
+                error("HTTP ${response.statusCode}: $text")
             }
             parseResponse(text)
         }
