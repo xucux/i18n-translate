@@ -40,6 +40,20 @@ class I18nEditorPopupGroup : ActionGroup(
             }
         }
 
+        if (vf != null && I18nPaths.isUnboundI18nFile(project, vf)) {
+            if (out.isNotEmpty()) out.add(Separator.create())
+            val cfg = project.getService(ProjectI18nConfigService::class.java).getState()
+            if (cfg.sourceFilePath.isBlank()) {
+                out.add(action("I18nTranslate.AddSourceFilePath"))
+            }
+            out.add(action("I18nTranslate.AddTargetFilePath"))
+        }
+
+        if (vf != null && I18nPaths.isI18nFile(vf) && I18nPaths.isProjectTargetFile(project, vf)) {
+            if (out.isNotEmpty()) out.add(Separator.create())
+            out.add(action("I18nTranslate.ReplaceTargetFilePath"))
+        }
+
         if (vf != null && I18nPaths.isI18nFile(vf) && I18nPaths.isProjectSourceFile(project, vf)) {
             if (editor != null) {
                 val keyInfo = I18nKeyDetector.detectKey(editor, editor.document.charsSequence, vf.path)
@@ -75,6 +89,10 @@ class I18nEditorPopupGroup : ActionGroup(
             val sel = I18nActionSupport.selectedKeyText(e)
             if (!sel.isNullOrBlank()) return true
         }
+
+        if (I18nPaths.isUnboundI18nFile(project, vf)) return true
+
+        if (I18nPaths.isI18nFile(vf) && I18nPaths.isProjectTargetFile(project, vf)) return true
 
         if (!I18nPaths.isI18nFile(vf) || !I18nPaths.isProjectSourceFile(project, vf)) return false
 

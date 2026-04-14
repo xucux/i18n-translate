@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.xucux"
-version = "0.0.3-231"
+version = "0.0.4-231"
 
 repositories {
     maven("https://maven.aliyun.com/repository/gradle-plugin")

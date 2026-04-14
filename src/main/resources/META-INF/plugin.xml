@@ -2,9 +2,11 @@
     <id>com.github.xucux.I18nTranslate</id>
     <name>I18N Translate</name>
     <vendor email="xucux@foxmail.com" url="https://xucux.github.io/">xucux</vendor>
-    <version>0.0.3-231</version>
+    <version>0.0.4-231</version>
     <change-notes>
         <![CDATA[
+    <p>0.0.4</p>
+    <p>- 优化添加文件方式 | Optimize file addition method</p>
     <p>0.0.3</p>
     <p>- 支持DeepL翻译服务 | Support DeepL translation service</p>    
     <p>0.0.2</p>
@@ -98,6 +100,13 @@
 
         <action id="I18nTranslate.FileAllKeys"
                 class="com.github.xucux.i18ntranslate.action.TranslateEntireSourceFileAction"/>
+
+        <action id="I18nTranslate.AddSourceFilePath"
+                class="com.github.xucux.i18ntranslate.action.AddSourceFilePathAction"/>
+        <action id="I18nTranslate.AddTargetFilePath"
+                class="com.github.xucux.i18ntranslate.action.AddTargetFilePathAction"/>
+        <action id="I18nTranslate.ReplaceTargetFilePath"
+                class="com.github.xucux.i18ntranslate.action.ReplaceTargetFilePathAction"/>
 
         <group id="I18nTranslate.EditorPopup"
                class="com.github.xucux.i18ntranslate.action.I18nEditorPopupGroup"
