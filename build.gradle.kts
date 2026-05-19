@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.xucux"
-version = "0.0.4-231"
+version = "0.0.5-231"
 
 repositories {
     maven("https://maven.aliyun.com/repository/gradle-plugin")
@@ -38,7 +38,7 @@ dependencies {
     // implementation("org.yaml:snakeyaml:2.2")
     
     // SwingX for JXMultiSplitPane
-    // implementation("org.swinglabs.swingx:swingx-all:1.6.5-1")
+    implementation("org.swinglabs.swingx:swingx-all:1.6.5-1")
 }
 
 tasks {

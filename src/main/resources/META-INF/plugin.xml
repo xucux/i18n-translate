@@ -2,9 +2,11 @@
     <id>com.github.xucux.I18nTranslate</id>
     <name>I18N Translate</name>
     <vendor email="xucux@foxmail.com" url="https://xucux.github.io/">xucux</vendor>
-    <version>0.0.4-231</version>
+    <version>0.0.5-231</version>
     <change-notes>
         <![CDATA[
+    <p>0.0.5</p>
+    <p>- 源配置新增翻译指定keys | Source configuration adds the selected keys for translation</p>
     <p>0.0.4</p>
     <p>- 优化添加文件方式 | Optimize file addition method</p>
     <p>0.0.3</p>
@@ -97,6 +99,13 @@
 
         <action id="I18nTranslate.KeyToAllTargets"
                 class="com.github.xucux.i18ntranslate.action.TranslateKeyToAllTargetsAction"/>
+
+        <group id="I18nTranslate.SelectedKeysToTargetGroup"
+               class="com.github.xucux.i18ntranslate.action.TranslateSelectedKeysToTargetDynamicGroup"
+               popup="true"/>
+
+        <action id="I18nTranslate.SelectedKeysToAllTargets"
+                class="com.github.xucux.i18ntranslate.action.TranslateSelectedKeysToAllTargetsAction"/>
 
         <action id="I18nTranslate.FileAllKeys"
                 class="com.github.xucux.i18ntranslate.action.TranslateEntireSourceFileAction"/>

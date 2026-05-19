@@ -111,4 +111,66 @@ object I18nKeyDetector {
 
     /** [selectedTextOrWord] 无选区时扩展光标左右所使用的「词」字符集。 */
     private fun isWordChar(c: Char): Boolean = c.isLetterOrDigit() || c == '_' || c == '.' || c == '-'
+
+    /** 选区中解析出的 key 及其实际 value。 */
+    data class SelectedKeyValue(val key: String, val value: String)
+
+    /**
+     * 从编辑器选区中提取所有有效 key-value 对（逐行按资源文件格式解析）。
+     * 值直接从选区文本中获取，无需读盘，支持未保存的编辑器内容。
+     */
+    fun selectedKeyValues(editor: Editor, path: String): List<SelectedKeyValue> {
+        val selectedText = editor.selectionModel.selectedText?.trim() ?: return emptyList()
+        val ext = runCatching { Paths.get(path).extension.lowercase() }.getOrNull() ?: return emptyList()
+        val kind = when (ext) {
+            "json" -> MessageFileKind.JSON
+            "properties" -> MessageFileKind.PROPERTIES
+            "yaml", "yml" -> MessageFileKind.YAML
+            else -> return emptyList()
+        }
+        return selectedText.lines().mapNotNull { line ->
+            val trimmed = line.trim()
+            if (trimmed.isEmpty() || trimmed.startsWith("#") || trimmed.startsWith("!")) return@mapNotNull null
+            try {
+                when (kind) {
+                    MessageFileKind.PROPERTIES -> {
+                        val sepIdx = line.indexOfAny(charArrayOf('=', ':'))
+                        if (sepIdx < 0) null else {
+                            val key = line.substring(0, sepIdx).trim()
+                            val value = line.substring(sepIdx + 1).trim().trim('"')
+                            if (key.isEmpty()) null else SelectedKeyValue(key, value)
+                        }
+                    }
+                    MessageFileKind.YAML -> {
+                        val startTrimmed = line.trimStart()
+                        val colon = startTrimmed.indexOf(':')
+                        if (colon <= 0) null else {
+                            val key = startTrimmed.substring(0, colon).trim()
+                            var value = startTrimmed.substring(colon + 1).trim()
+                            if (value.startsWith('"') && value.endsWith('"') && value.length >= 2) {
+                                value = value.substring(1, value.length - 1)
+                            }
+                            if (key.isEmpty()) null else SelectedKeyValue(key, value)
+                        }
+                    }
+                    MessageFileKind.JSON -> {
+                        val m = Regex("""^\s*"([^"\\]+(?:\\.[^"\\]*)*)"\s*:\s*"([^"]*)"\s*,?\s*$""").find(line)
+                            ?: Regex("""^\s*"([^"\\]+(?:\\.[^"\\]*)*)"\s*:\s*([^,]+)\s*,?\s*$""").find(line)
+                        if (m == null) null else {
+                            val key = m.groupValues[1].replace("\\\"", "\"").replace("\\\\", "\\")
+                            val rawVal = m.groupValues.getOrNull(2)?.trim().orEmpty()
+                            val value = rawVal.removeSurrounding("\"").replace("\\\"", "\"").replace("\\\\", "\\")
+                            SelectedKeyValue(key, value)
+                        }
+                    }
+                }
+            } catch (_: Exception) { null }
+        }.distinctBy { it.key }
+    }
+
+    /**
+     * 从编辑器选区中提取所有有效 key 的列表（仅 key，不取值）。
+     */
+    fun selectedKeys(editor: Editor, path: String): List<String> =
+        selectedKeyValues(editor, path).map { it.key }
 }

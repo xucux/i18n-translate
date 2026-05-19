@@ -56,13 +56,20 @@ class I18nEditorPopupGroup : ActionGroup(
 
         if (vf != null && I18nPaths.isI18nFile(vf) && I18nPaths.isProjectSourceFile(project, vf)) {
             if (editor != null) {
-                val keyInfo = I18nKeyDetector.detectKey(editor, editor.document.charsSequence, vf.path)
                 val hasTargets = project.getService(ProjectI18nConfigService::class.java).getState().targets
                     .any { it.filePath.isNotBlank() }
+                val keyInfo = I18nKeyDetector.detectKey(editor, editor.document.charsSequence, vf.path)
                 if (keyInfo != null && hasTargets) {
                     if (out.isNotEmpty()) out.add(Separator.create())
                     out.add(am.getAction("I18nTranslate.TranslateToTargetGroup")!!)
                     out.add(action("I18nTranslate.KeyToAllTargets"))
+                }
+
+                val selectedKeys = I18nKeyDetector.selectedKeys(editor, vf.path)
+                if (selectedKeys.isNotEmpty() && hasTargets) {
+                    if (out.isNotEmpty()) out.add(Separator.create())
+                    out.add(am.getAction("I18nTranslate.SelectedKeysToTargetGroup")!!)
+                    out.add(action("I18nTranslate.SelectedKeysToAllTargets"))
                 }
             }
             if (out.isNotEmpty()) out.add(Separator.create())
@@ -97,10 +104,14 @@ class I18nEditorPopupGroup : ActionGroup(
         if (!I18nPaths.isI18nFile(vf) || !I18nPaths.isProjectSourceFile(project, vf)) return false
 
         if (editor != null) {
-            val keyInfo = I18nKeyDetector.detectKey(editor, editor.document.charsSequence, vf.path)
             val hasTargets = project.getService(ProjectI18nConfigService::class.java).getState().targets
                 .any { it.filePath.isNotBlank() }
+            val keyInfo = I18nKeyDetector.detectKey(editor, editor.document.charsSequence, vf.path)
             if (keyInfo != null && hasTargets) return true
+            if (editor.selectionModel.hasSelection()) {
+                val selKeys = I18nKeyDetector.selectedKeys(editor, vf.path)
+                if (selKeys.isNotEmpty() && hasTargets) return true
+            }
         }
 
         return true
